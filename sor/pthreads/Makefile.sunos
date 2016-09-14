@@ -1,0 +1,26 @@
+# makefile for digits recognizer
+
+.SUFFIXES: .o .c
+
+CC = gcc
+CFLAGS = -msupersparc -Wa,-xarch=v8plus -O3
+LFLAGS = -lm -lpthread
+
+CTAGS =     ctags
+BIN = sor
+CFILES =   sor_pthread.c
+HFILES = 
+OTHERSOURCES =  
+SOURCES =   $(HFILES) $(CFILES) $(OTHERSOURCES)
+
+
+$(BIN): $(OBJECTS)
+	$(CC) $(CFLAGS) $(LFLAGS) -o $(BIN) $(CFILES) 
+
+tags: $(CFILES) $(HFILES) $(EXTRACTCFILES) $(RECOGCFILES)
+# for vi:
+	$(CTAGS) -d -t -T -w $(CFILES) $(HFILES) 
+	sort -o tags tags
+
+clean:
+	-rm $(BIN) $(OBJECTS) 

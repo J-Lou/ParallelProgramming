@@ -1,0 +1,4 @@
+#!/usr/staff/bin/tcsh
+
+#2 threads
+./sor -p2
