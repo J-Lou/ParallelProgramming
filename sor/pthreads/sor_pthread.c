@@ -107,6 +107,9 @@ sor_odd (begin, end, task_id)
     struct timeval sstart, sfinish;
 #endif
 
+    // CLASSNOTE
+    // cannot parallelize this loop
+    // you can parallelize the the inner updates and writes
     for (i = 0; i < iterations; i++) {
 #ifdef TIME_EACH_ITERATION
         gettimeofday (&sstart, NULL);
@@ -131,6 +134,10 @@ sor_odd (begin, end, task_id)
             }
         }
 
+
+        // CLASSNOTE
+        // barrier acts as a wait - every thread waits here until all threads have arrived. 
+        // task_num = how many threads are waiting at barrier
         barrier (task_num);
 
         for (j = begin; j <= end; j++) {
@@ -154,6 +161,8 @@ sor_odd (begin, end, task_id)
 
         barrier (task_num);
 
+        // CLASSNOTE
+        // Only first thread starts timer
 #ifdef	RESET_AFTER_ONE_ITERATION
         if ((i == 0) && (task_id == 0)){
             puts ("restart");
@@ -258,6 +267,8 @@ work_thread (void *lp)
     barrier (task_num);
     gettimeofday (&finish, NULL);
 
+    // CLASSNOTE
+    // this determines how parallel program is`
     if(task_id==0)
         printf ("Elapsed time: %.2f seconds\n",
 	        (((finish.tv_sec * 1000000.0) + finish.tv_usec) -
@@ -276,6 +287,8 @@ main (argc, argv)
     pthread_t *tid;
     int *id;
 
+    // CLASSNOTE
+    // option p = number of processes
     while ((c = getopt (argc, argv, "vi:m:n:p:")) != -1)
         switch (c) {
         case 'i':
