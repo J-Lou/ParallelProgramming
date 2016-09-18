@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
     struct timeval start, finish;
     double error;
     
-    if (argc < 2) {
+    if (argc != 3) {
 	    fprintf(stderr, "usage: %s <matrixfile> <# threads>\n", argv[0]);
 	    exit(-1);
     }
