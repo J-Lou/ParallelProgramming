@@ -42,11 +42,13 @@ int currow;
 pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
+/** Barrier that stops all threads until each thread has reached it. */
+
 void barrier (int expect)
 {
     static int arrived = 0;
 
-    pthread_mutex_lock (&mut);	//lock
+    pthread_mutex_lock (&mut);
 
     arrived++;
     if (arrived < expect)
@@ -56,7 +58,7 @@ void barrier (int expect)
         pthread_cond_broadcast (&cond);
     }
 
-    pthread_mutex_unlock (&mut);	//unlock
+    pthread_mutex_unlock (&mut);
 }
 
 /* Initialize the Matrix */
@@ -123,16 +125,16 @@ void initRHS()
     X__ = (double*)malloc(nsize * sizeof(double));
     assert(X__ != NULL);
     for (i = 0; i < nsize; i++) {
-	X__[i] = i+1;
+	    X__[i] = i+1;
     }
 
     R = (double*)malloc(nsize * sizeof(double));
     assert(R != NULL);
     for (i = 0; i < nsize; i++) {
-	R[i] = 0.0;
-	for (j = 0; j < nsize; j++) {
-	    R[i] += matrix[i][j] * X__[j];
-	}
+	    R[i] = 0.0;
+	    for (j = 0; j < nsize; j++) {
+	        R[i] += matrix[i][j] * X__[j];
+	    }
     }
 }
 
@@ -145,7 +147,7 @@ void initResult()
     X = (double*)malloc(nsize * sizeof(double));
     assert(X != NULL);
     for (i = 0; i < nsize; i++) {
-	X[i] = 0.0;
+	    X[i] = 0.0;
     }
 }
 
@@ -157,9 +159,9 @@ void getPivot()
 
     pivotrow = currow;
     for (i = currow+1; i < nsize; i++) {
-	if (fabs(matrix[i][currow]) > fabs(matrix[pivotrow][currow])) {
-	    pivotrow = i;
-	}
+	    if (fabs(matrix[i][currow]) > fabs(matrix[pivotrow][currow])) {
+	        pivotrow = i;
+	    }
     }
 
     if (fabs(matrix[pivotrow][currow]) == 0.0) {
@@ -285,8 +287,8 @@ int main(int argc, char *argv[])
     double error;
     
     if (argc != 2) {
-	fprintf(stderr, "usage: %s <matrixfile>\n", argv[0]);
-	exit(-1);
+	    fprintf(stderr, "usage: %s <matrixfile>\n", argv[0]);
+	    exit(-1);
     }
 
     initMatrix(argv[1]);
@@ -303,10 +305,10 @@ int main(int argc, char *argv[])
 
     error = 0.0;
     for (i = 0; i < nsize; i++) {
-	double error__ = (X__[i]==0.0) ? 1.0 : fabs((X[i]-X__[i])/X__[i]);
-	if (error < error__) {
-	    error = error__;
-	}
+	    double error__ = (X__[i]==0.0) ? 1.0 : fabs((X[i]-X__[i])/X__[i]);
+	    if (error < error__) {
+	        error = error__;
+	    }
     }
     fprintf(stdout, "Error: %e\n", error);
 
