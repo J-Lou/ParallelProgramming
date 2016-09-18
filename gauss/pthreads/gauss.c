@@ -222,6 +222,8 @@ void * workerThread(void *lp)
         }
         R[j] -= pivotval * R[begin];
     }
+
+    return NULL;
 }
 
 void initThreads()
