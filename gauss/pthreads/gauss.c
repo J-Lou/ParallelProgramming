@@ -222,7 +222,7 @@ void * workerThread(void *lp)
     }
 }
 
-pthread_t * initThreads()
+void initThreads()
 {
     int i;
     int *id = (int *) malloc (sizeof (int) * task_num);
