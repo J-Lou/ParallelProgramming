@@ -208,13 +208,10 @@ void * workerThread(void *lp)
         
     barrier(task_num);
 
-    int begin, end;
-    begin = ((nsize * task_id) / task_num) + currow;
-    end = ((nsize - currow) * (task_id + 1)) / (task_num);
+    int begin = currow + task_id;
 
-    // DETERMINE WHICH VALUES OF J THREAD SHOULD UPDATE
 	/* Factorize the rest of the matrix. */
-    for (j = begin + 1; j < nsize; j++) {
+    for (j = begin + 1; j < nsize; j = j + task_num) {
         pivotval = matrix[j][begin];
         matrix[j][begin] = 0.0;
         for (k = begin + 1; k < nsize; k++) {
@@ -288,11 +285,12 @@ int main(int argc, char *argv[])
     struct timeval start, finish;
     double error;
     
-    if (argc != 2) {
-	    fprintf(stderr, "usage: %s <matrixfile>\n", argv[0]);
+    if (argc < 2) {
+	    fprintf(stderr, "usage: %s <matrixfile> <# threads>\n", argv[0]);
 	    exit(-1);
     }
 
+    task_num = atoi(argv[2]);
     initMatrix(argv[1]);
     initRHS();
     initResult();
