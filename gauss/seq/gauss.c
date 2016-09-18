@@ -12,7 +12,7 @@
 #include <math.h>
 #include <assert.h>
 
-/* #define DEBUG */
+//#define DEBUG 
 
 #define SWAP(a,b)       {double tmp; tmp = a; a = b; b = tmp;}
 
