@@ -37,7 +37,7 @@ int nsize;
 
 /* The current row */
 
-int currow = 0;
+int currow;
 
 pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
@@ -188,49 +188,42 @@ void errexit(const char *err_str)
 
 void * workerThread(void *lp)
 { 
-    while (currow < nsize) {
-
-        int task_id = *((int *) lp);
-        int j, k;
-        double pivotval = matrix[currow][currow];
+    int task_id = *((int *) lp);
+    int j, k;
+    double pivotval = matrix[currow][currow];
     
-        if (task_id == 0) {
-	        getPivot();
+    if (task_id == 0) {
+
+	    getPivot();
         
-	        /* Scale the main row. */
-	        if (pivotval != 1.0) {
-	            matrix[currow][currow] = 1.0;
-	            for (j = currow + 1; j < nsize; j++) {
-	    	        matrix[currow][j] /= pivotval;
-	            }
-	            R[currow] /= pivotval;
+	    /* Scale the main row. */
+	    if (pivotval != 1.0) {
+	        matrix[currow][currow] = 1.0;
+	        for (j = currow + 1; j < nsize; j++) {
+	    	    matrix[currow][j] /= pivotval;
 	        }
-        }
-        
-        barrier(task_num);
-
-        int begin = currow + task_id;
-
-	    /* Factorize the rest of the matrix. */
-        for (j = begin + 1; j < nsize; j = j + task_num) {
-            pivotval = matrix[j][begin];
-            matrix[j][begin] = 0.0;
-            for (k = begin + 1; k < nsize; k++) {
-                matrix[j][k] -= pivotval * matrix[begin][k];
-            }
-            R[j] -= pivotval * R[begin];
-        }
-
-        if (task_id == 0) currow++;
-        barrier(task_num);
+	        R[currow] /= pivotval;
+	    }
     }
+        
+    barrier(task_num);
+
+    int begin = currow + task_id;
+
+	/* Factorize the rest of the matrix. */
+    for (j = begin + 1; j < nsize; j = j + task_num) {
+        pivotval = matrix[j][begin];
+        matrix[j][begin] = 0.0;
+        for (k = begin + 1; k < nsize; k++) {
+            matrix[j][k] -= pivotval * matrix[begin][k];
+        }
+        R[j] -= pivotval * R[begin];
+    }
+
     return NULL;
 }
 
-/* For all the rows, get the pivot and eliminate all rows and columns
- * for that particular pivot row. */
-
-void computeGauss()
+void initThreads()
 {
     int i;
     int *id = (int *) malloc (sizeof (int) * task_num);
@@ -249,6 +242,24 @@ void computeGauss()
     
     for (i = 0; i < task_num; i++)
         pthread_join (tid[i], NULL);
+}
+
+/* For all the rows, get the pivot and eliminate all rows and columns
+ * for that particular pivot row. */
+
+void computeGauss()
+{
+    struct timeval start, finish;
+    gettimeofday(&start, NULL);
+    int i;
+    for (i = 0; i < nsize; i++) {
+        currow=i;
+        initThreads();
+    }
+    gettimeofday(&finish, NULL);
+    printf ("Gaussian Elimination Time: %.2f seconds\n",
+            (((finish.tv_sec * 1000000.0) + finish.tv_usec) -
+             ((start.tv_sec * 1000000.0) + start.tv_usec)) / 1000000.0);
 }
 
 /* Solve the equation. */
